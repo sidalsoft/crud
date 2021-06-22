@@ -7,6 +7,10 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/sidalsoft/crud/cmd/app"
 	"github.com/sidalsoft/crud/pkg/customers"
+	"github.com/sidalsoft/crud/pkg/managers"
+	"github.com/sidalsoft/crud/pkg/products"
+	"github.com/sidalsoft/crud/pkg/salePositions"
+	"github.com/sidalsoft/crud/pkg/sales"
 	"github.com/sidalsoft/crud/pkg/security"
 	"go.uber.org/dig"
 	"log"
@@ -18,7 +22,7 @@ import (
 
 func main() {
 	host := "0.0.0.0"
-	port := "9999"
+	port := "8000"
 	dsn := "postgres://postgres:postgres@localhost:5432/bankdb"
 
 	if err := execute(host, port, dsn); err != nil {
@@ -36,6 +40,10 @@ func execute(host string, port string, dsn string) (err error) {
 			return pgxpool.Connect(ctx, dsn)
 		},
 		customers.NewService,
+		managers.NewManagersService,
+		products.NewProductService,
+		salePositions.NewSalePositionsService,
+		sales.NewSalesService,
 		security.NewAuthService,
 		func(server *app.Server) *http.Server {
 			return &http.Server{
@@ -61,6 +69,5 @@ func execute(host string, port string, dsn string) (err error) {
 	return container.Invoke(func(server *http.Server) error {
 		return server.ListenAndServe()
 	})
-
 
 }

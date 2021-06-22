@@ -197,6 +197,18 @@ func (s *Service) Save(ctx context.Context, customer *Customer) (c *Customer, er
 
 }
 
+func (s *Service) IDByToken(ctx context.Context, token string) (int64, error) {
+	var id int64
+	err := s.pool.QueryRow(ctx, "SELECT customer_id FROM customers_tokens WHERE token = $1", token).Scan(&id)
+	if err == pgx.ErrNoRows {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 func hashPassword(pass string) string {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	if err != nil {

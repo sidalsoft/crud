@@ -40,7 +40,7 @@ func (as *AuthService) Auth(login, password string) (ok bool) {
 	return true
 }
 
-func (as AuthService) TokenForCustomer(ctx context.Context, phone string, password string) (token string, err error) {
+func (as *AuthService) TokenForCustomer(ctx context.Context, phone string, password string) (token string, err error) {
 	var hash string
 	var id int64
 	err = as.pool.QueryRow(ctx, `SELECT id, password FROM customers WHERE phone = $1`, phone).
@@ -73,10 +73,10 @@ func (as *AuthService) AuthenticateCustomer(ctx context.Context, token string) (
 	err = as.pool.QueryRow(ctx, `SELECT customer_id, expire FROM customers_tokens WHERE token = $1`, token).Scan(&id, &expire)
 
 	if err == pgx.ErrNoRows {
-		return 0,nil, ErrNoSuchUser
+		return 0, nil, ErrNoSuchUser
 	}
 	if err != nil {
-		return 0,nil, ErrInternal
+		return 0, nil, ErrInternal
 	}
-	return id, expire,nil
+	return id, expire, nil
 }

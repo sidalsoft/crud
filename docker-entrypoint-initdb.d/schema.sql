@@ -7,19 +7,20 @@ CREATE TABLE products
     active  BOOLEAN   NOT NULL DEFAULT TRUE,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
 CREATE TABLE managers
 (
     id         BIGSERIAL PRIMARY KEY,
     name       TEXT      NOT NULL,
-    salary     INTEGER   NOT NULL CHECK ( salary > 0 ),
-    plan       INTEGER   NOT NULL CHECK ( salary > 0 ),
+    salary     INTEGER   NOT NULL CHECK ( salary > 0 ) default 1,
+    plan       INTEGER   NOT NULL CHECK ( salary > 0 ) default 1,
     boss_id    BIGINT REFERENCES managers,
-    department TEXT,
+    department TEXT default '',
     phone      TEXT      NOT NULL UNIQUE,
-    password   TEXT,
-    roles      TEXT[]    NOT NULL DEFAULT '{}',
-    active     BOOLEAN   NOT NULL DEFAULT TRUE,
-    created    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    password   TEXT default '',
+    roles      TEXT[]    NOT NULL                      DEFAULT '{}',
+    active     BOOLEAN   NOT NULL                      DEFAULT TRUE,
+    created    TIMESTAMP NOT NULL                      DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE customers
@@ -58,6 +59,7 @@ CREATE TABLE customers_tokens
     expire      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP + INTERVAL '1 hour',
     created     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
 
 CREATE TABLE managers_tokens
 (

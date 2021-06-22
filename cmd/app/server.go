@@ -4,7 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
+	"github.com/sidalsoft/crud/cmd/app/middleware"
 	"github.com/sidalsoft/crud/pkg/customers"
+	"github.com/sidalsoft/crud/pkg/managers"
+	"github.com/sidalsoft/crud/pkg/products"
+	"github.com/sidalsoft/crud/pkg/salePositions"
+	"github.com/sidalsoft/crud/pkg/sales"
 	"github.com/sidalsoft/crud/pkg/security"
 	"log"
 	"net/http"
@@ -14,13 +19,23 @@ import (
 
 //Server представляет собой логический сервер нашего приложения
 type Server struct {
-	mux         *mux.Router
-	customerSvc *customers.Service
-	authSvc     *security.AuthService
+	mux              *mux.Router
+	customerSvc      *customers.Service
+	managerSvc       *managers.ManagersService
+	productSvc       *products.ProductService
+	salePositionsSvc *salePositions.SalePositionsService
+	saleSvc          *sales.SalesService
+	authSvc          *security.AuthService
 }
 
-func NewServer(mux *mux.Router, customerSvc *customers.Service, authSvc *security.AuthService) *Server {
-	return &Server{mux: mux, customerSvc: customerSvc, authSvc: authSvc}
+func NewServer(mux *mux.Router, customerSvc *customers.Service,
+	authSvc *security.AuthService, managerSvc *managers.ManagersService,
+	productSvc *products.ProductService, salePositionsSvc *salePositions.SalePositionsService,
+	saleSvc *sales.SalesService) *Server {
+	return &Server{mux: mux, customerSvc: customerSvc,
+		authSvc: authSvc, managerSvc: managerSvc,
+		productSvc: productSvc, salePositionsSvc: salePositionsSvc,
+		saleSvc: saleSvc}
 }
 
 func (s *Server) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -39,6 +54,20 @@ func (s *Server) Init() {
 	s.mux.HandleFunc("/api/customers", s.handleSave).Methods(POST)
 	s.mux.HandleFunc("/api/customers/token", s.handleGenerateToken).Methods(POST)
 	s.mux.HandleFunc("/api/customers/token/validate", s.handleValidateToken).Methods(POST)
+
+	managersSubrouter := s.mux.PathPrefix("/api/managers").Subrouter()
+	managersSubrouter.Use(middleware.Authenticate(s.managerSvc.IDByToken))
+	managersSubrouter.HandleFunc("/token", s.handleManagerGetToken).Methods(POST)
+	managersSubrouter.HandleFunc("/sales", s.handleManagerGetSales).Methods(GET)
+	managersSubrouter.HandleFunc("/sales", s.handleManagerMakeSale).Methods(POST)
+	managersSubrouter.HandleFunc("/products", s.handleManagerGetProducts).Methods(GET)
+	managersSubrouter.HandleFunc("/products/{id}", s.handleManagerRemoveProductByID).Methods(DELETE)
+	managersSubrouter.HandleFunc("/customers", s.handleManagerGetCustomers).Methods(GET)
+	managersSubrouter.HandleFunc("/customers", s.handleManagerChangeCustomer).Methods(POST)
+	managersSubrouter.HandleFunc("/customers/{id}", s.handleManagerRemoveCustomerByID).Methods(DELETE)
+	isAdmin := middleware.CheckRole(s.managerSvc.HasAnyRole, "ADMIN")
+	managersSubrouter.HandleFunc("", isAdmin(http.HandlerFunc(s.handleManagerRegistration)).ServeHTTP).Methods(POST)
+	managersSubrouter.HandleFunc("/products", s.handleManagerChangeProduct).Methods(POST)
 
 	//s.mux.Use(middleware.Basic(s.authSvc))
 	//s.mux.HandleFunc("/customers.getAll", s.handleGetAllCustomers)
