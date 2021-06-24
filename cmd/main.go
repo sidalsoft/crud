@@ -21,6 +21,9 @@ import (
 )
 
 func main() {
+	//keyGen.KeyGenInit()
+	//keyGen.Init()
+	//keyGen.HomeworkInit()
 	host := "0.0.0.0"
 	port := "8000"
 	dsn := "postgres://postgres:postgres@localhost:5432/bankdb"
