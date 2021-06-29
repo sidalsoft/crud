@@ -21,6 +21,16 @@ import (
 )
 
 func main() {
+	//keyGen.GenCertificate()
+	/*err := http.ListenAndServeTLS(
+		"go.alif.dev:9999",
+		"server.crt",
+		"server-private.key",
+		http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			writer.Write([]byte("hello crypto"))
+		}))
+	log.Fatal(err)*/
+
 	//keyGen.KeyGenInit()
 	//keyGen.Init()
 	//keyGen.HomeworkInit()

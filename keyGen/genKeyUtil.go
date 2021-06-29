@@ -18,18 +18,18 @@ func KeyGenInit() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = encodePrivateKey(err, key)
+	err = encodePrivateKey(key, "private.key")
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = encodePublicKey(err, &key.PublicKey)
+	err = encodePublicKey(&key.PublicKey, "public.key")
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func encodePrivateKey(err error, key *rsa.PrivateKey) error {
-	privateKeyFile, err := os.Create("private.key")
+func encodePrivateKey(key *rsa.PrivateKey, path string) error {
+	privateKeyFile, err := os.Create(path)
 	if err != nil {
 		return err
 	}
@@ -49,8 +49,8 @@ func encodePrivateKey(err error, key *rsa.PrivateKey) error {
 	return nil
 }
 
-func encodePublicKey(err error, key *rsa.PublicKey) error {
-	publicKeyFile, err := os.Create("public.key")
+func encodePublicKey(key *rsa.PublicKey, path string) error {
+	publicKeyFile, err := os.Create(path)
 	if err != nil {
 		return err
 	}
